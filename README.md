@@ -1,5 +1,11 @@
 # minimongo-cache
 
+---
+
+The purpose of this fork of minimongo-cache is to keep its dependencies up to date and ensure it keeps working in the future.
+
+---
+
 A forked version of [Minimongo](https://github.com/mWater/minimongo) designed for a synchronous local cache for React apps. This is designed to replace Flux.
 
 Not ready for production use.
