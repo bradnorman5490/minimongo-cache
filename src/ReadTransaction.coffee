@@ -3,6 +3,7 @@ SynchronousWriteTransaction = require './SynchronousWriteTransaction'
 
 class ReadTransaction extends NullTransaction
   constructor: ->
+    super()
     @dirtyIds = {}
     @dirtyScans = {}
     @log = []

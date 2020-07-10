@@ -1,4 +1,4 @@
-var gulp = require("gulp");
+var { src, series, dest } = require("gulp");
 var babel = require('gulp-babel');
 var coffee = require('gulp-coffee');
 var gutil = require('gulp-util');
@@ -9,42 +9,45 @@ var uglify = require('gulp-uglify');
 var coffeeify = require('coffeeify');
 var buffer = require('vinyl-buffer');
 var rename = require("gulp-rename");
+const { compile } = require("coffeeify");
 
-// Compilation
-gulp.task('coffee', function() {
-	return gulp.src('./src/*.coffee')
-		.pipe(coffee({ bare: true }).on('error', gutil.log))
-		.pipe(gulp.dest('./lib/'));
-});
+// compilation
+function compileCoffee (cb) {
+	return src('./src/*.coffee')
+		.pipe(coffee({ bare: true }).on('error', console.log))
+		.pipe(dest('./lib'));
+	cb();
+}
 
-gulp.task('copy', function() {
-	return gulp.src(['./src/**/*.js'])
-    .pipe(babel({presets: ['es2015']}))
-		.pipe(gulp.dest('./lib/'));
-});
+function copy (cb) {
+	return src(['./src/**/*.js'])
+		.pipe(babel({ presets: ['@babel/env'] }))
+		.pipe(dest('./lib'));
+}
 
-gulp.task('prepareTests', ['coffee', 'copy'], function() {
-	var bundler = browserify({entries: glob.sync("./test/*Tests.coffee"), extensions: [".coffee"] }).
-		transform(coffeeify);
+function prepareTests (cb) {
+	var bundler = browserify({ entries: glob.sync('./test/*Tests.coffee'), extensions: [".coffee"] })
+		.transform(coffeeify);
 	var stream = bundler.bundle()
-		// TODO error handling not working
-	    .on('error', gutil.log)
-	    .on('error', function() { throw "Failed" })
+		.on('error', gutil.log)
+		.on('error', function () {
+			throw 'Failed';
+		})
 		.pipe(streamConvert('browserified.js'))
-		.pipe(gulp.dest('./test'));
+		.pipe(dest('./test'));
 	return stream;
-});
+}
 
-gulp.task('dist', ['copy', 'coffee'], function() {
-  bundler = browserify();
-  bundler.require("./index.js", { expose: "minimongo"});
-  return bundler.bundle()
-    .pipe(streamConvert('minimongo.js'))
-    .pipe(gulp.dest("./dist/"))
-    .pipe(buffer())
-    .pipe(rename("minimongo.min.js"))
-    .pipe(uglify())
-    .pipe(gulp.dest('./dist/'));
-});
+function dist () {
+	var bundler = browserify();
+	bundler.require('./index.js', { expose: 'minimongo' });
+	return bundler.bundle()
+		.pipe(streamConvert('minimongo.js'))
+		.pipe(dest('./dist/'))
+		.pipe(buffer())
+		.pipe(rename('minimongo.min.js'))
+		.pipe(uglify())
+		.pipe(dest('./dist/'));
+}
 
-gulp.task('default', ['coffee', 'copy', 'dist']);
+exports.default = series(compileCoffee, copy, dist)
