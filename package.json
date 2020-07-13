@@ -4,8 +4,7 @@
   "description": "Fork of minimongo designed for caching",
   "main": "index.js",
   "scripts": {
-    "test": "testem ci -s phantomjs",
-    "postinstall": "gulp"
+    "test": "testem ci -s phantomjs"
   },
   "license": "LGPLv3",
   "homepage": "https://github.com/bradnorman5490/minimongo-cache",
